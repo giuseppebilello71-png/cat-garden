@@ -486,8 +486,41 @@ function closeNameModal(){
   modalBackdrop.style.display = "none";
 }
 
+// ✅ LINK STRIPE (TEST)
+const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_3cIbJ22rqeYE5eH6ui0x200";
+
+// contatore “gatti pagati” da riscattare (salvato nel browser)
+let pendingPaidCats = parseInt(sessionStorage.getItem("pendingPaidCats") || "0", 10);
+
+// Se l’utente torna da Stripe con ?paid=1, aggiungiamo 1 “riscatto”
+(function handleReturnFromStripe(){
+  const url = new URL(window.location.href);
+  const paid = url.searchParams.get("paid");
+
+  if(paid === "1"){
+    pendingPaidCats += 1;
+    sessionStorage.setItem("pendingPaidCats", String(pendingPaidCats));
+
+    // pulisci la URL (così non crea gatti a ogni refresh)
+    url.searchParams.delete("paid");
+    window.history.replaceState({}, "", url.toString());
+
+    // apri subito la scelta nome
+    openNameModal();
+  }
+})();
+
+// Quando clicchi il bottone:
 btnAdopt.addEventListener("click", ()=>{
-  openNameModal();
+  // se hai già un riscatto disponibile, fai scegliere nome e crea gatto
+  pendingPaidCats = parseInt(sessionStorage.getItem("pendingPaidCats") || "0", 10);
+
+  if(pendingPaidCats > 0){
+    openNameModal();
+  } else {
+    // altrimenti vai a pagare su Stripe
+    window.location.href = STRIPE_PAYMENT_LINK;
+  }
 });
 
 cancelName.addEventListener("click", closeNameModal);
