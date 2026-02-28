@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cat Garden</title>
+  <style>
+    :root{
+      --bg1:#b8f7c5;
+      --bg2:#8fd3f4;
+      --panel: rgba(255,255,255,.88);
+      --shadow: 0 8px 22px rgba(0,0,0,.18);
+    }
+    body{
+      margin:0;
+      overflow:hidden;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      user-select:none;
+    }
+
+    /* Garden */
+    #garden{
+      position:relative;
+      width:100vw;
+      height:100vh;
+    }
+    /* subtle grass */
+    #garden::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image:
+        radial-gradient(rgba(0,0,0,.06) 1px, transparent 1px);
+      background-size: 12px 12px;
+      opacity:.35;
+      pointer-events:none;
+    }
+
+    /* UI */
+    #ui{
+      position:fixed;
+      top:14px;
+      left:14px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      z-index:10;
+      flex-wrap:wrap;
+    }
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 14px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      font-weight:700;
+      cursor:pointer;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    #badge{
+      background: var(--panel);
+      border-radius:14px;
+      padding:10px 12px;
+      box-shadow: var(--shadow);
+      font-size:13px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    #badge b{ font-size:14px; }
+
+    /* Cat */
+    .cat{
+      position:absolute;
+      font-size: 40px;
+      transform: translate(0,0);
+      transition: transform 3.6s linear;
+      cursor:pointer;
+      filter: drop-shadow(0 6px 6px rgba(0,0,0,.22));
+    }
+    .cat .label{
+      position:absolute;
+      left:50%;
+      transform: translateX(-50%);
+      top:-18px;
+      font-size: 11px;
+      font-weight:800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.90);
+      box-shadow: 0 6px 14px rgba(0,0,0,.12);
+      white-space:nowrap;
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .cat .petcount{
+      font-weight:900;
+      opacity:.8;
+    }
+    .cat .emoji{
+      display:inline-block;
+      transition: transform .18s ease;
+    }
+    .cat:active .emoji{ transform: scale(1.08); }
+
+    /* Owned cat highlight */
+    .owned{
+      outline: 3px solid rgba(255,215,0,.85);
+      outline-offset: 6px;
+      border-radius: 18px;
+      animation: glow 1.4s ease-in-out infinite alternate;
+    }
+    @keyframes glow{
+      from{ filter: drop-shadow(0 0 8px rgba(255,215,0,.35)) drop-shadow(0 6px 6px rgba(0,0,0,.22)); }
+      to{ filter: drop-shadow(0 0 14px rgba(255,215,0,.65)) drop-shadow(0 6px 6px rgba(0,0,0,.22)); }
+    }
+
+    /* Rarity colors for label text */
+    .r-common .label{ color:#2f2f2f; }
+    .r-rare .label{ color:#0b63ff; }
+    .r-epic .label{ color:#7b2cbf; }
+    .r-legendary .label{ color:#c97a00; }
+
+    /* Hearts pop */
+    .heart{
+      position:absolute;
+      font-size:18px;
+      animation: pop 850ms ease-out forwards;
+      pointer-events:none;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,.2));
+    }
+    @keyframes pop{
+      0%{ transform: translateY(0) scale(.8); opacity:0; }
+      15%{ opacity:1; }
+      100%{ transform: translateY(-42px) scale(1.25); opacity:0; }
+    }
+
+    /* Small footer tip */
+    #tip{
+      position:fixed;
+      bottom:14px;
+      left:14px;
+      background: rgba(255,255,255,.70);
+      border-radius:14px;
+      padding:10px 12px;
+      font-size:12px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      z-index:10;
+    }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <button class="btn" id="btnAdopt">➕ Adotta un gatto</button>
+    <button class="btn" id="btnCenter" disabled>🎯 Trova il mio gatto</button>
+    <button class="btn" id="btnSound">🔇 Fusa: OFF</button>
+    <div id="badge">
+      <div>🐱 Totale: <b id="totalCats">0</b></div>
+      <div>💗 Coccole: <b id="totalPets">0</b></div>
+    </div>
+  </div>
+
+  <div id="tip">Tocca un gatto per coccolarlo. I cappelli e i colori hanno rarità ✨</div>
+  <div id="garden" aria-label="Cat Garden"></div>
+
+<script>
+/* -----------------------------
+   Simple single-page prototype
+   - Random rarity colors
+   - Random hats
+   - Pet interaction + hearts
+   - Optional purr sound
+   - Owned cats highlight + center button
+   - Multiple cats per user (you can adopt more)
+-------------------------------- */
+
+const garden = document.getElementById("garden");
+const totalCatsEl = document.getElementById("totalCats");
+const totalPetsEl = document.getElementById("totalPets");
+const btnAdopt = document.getElementById("btnAdopt");
+const btnCenter = document.getElementById("btnCenter");
+const btnSound = document.getElementById("btnSound");
+
+let totalPets = 0;
+let soundEnabled = false;
+let ownedCats = [];     // user can have multiple cats
+let lastOwnedCat = null;
+
+// Weighted rarity roll
+const rarities = [
+  { key: "common",    label:"COMUNE",     chance: 70 },
+  { key: "rare",      label:"RARA",       chance: 20 },
+  { key: "epic",      label:"EPICA",      chance: 8  },
+  { key: "legendary", label:"LEGGENDARIA",chance: 2  }
+];
+
+// Colors pool per rarity (including unrealistic colors)
+const colorPools = {
+  common:    ["#2b2b2b","#ffffff","#c49a6c","#8d6e63","#9e9e9e"],
+  rare:      ["#00a8ff","#ff4d6d","#00c2a8","#ffd166","#a0c4ff"],
+  epic:      ["#7b2cbf","#00bbf9","#ff6d00","#ff00ff","#00ffd5"],
+  legendary: ["#ffd700","#ff7b00","#00ff7f","#00e5ff","#ff1744"]
+};
+
+// Hats weighted (null = no hat)
+const hatsWeighted = [
+  { hat: null, chance: 55 },
+  { hat: "🎩", chance: 10 },
+  { hat: "👑", chance: 3  },
+  { hat: "🧢", chance: 10 },
+  { hat: "🎀", chance: 8  },
+  { hat: "🌸", chance: 8  },
+  { hat: "🎓", chance: 4  },
+  { hat: "✨", chance: 2  }
+];
+
+function rand(min, max){ return Math.random() * (max - min) + min; }
+function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+function weightedPick(list){
+  const roll = Math.random() * 100;
+  let sum = 0;
+  for(const item of list){
+    sum += item.chance;
+    if(roll <= sum) return item;
+  }
+  return list[list.length - 1];
+}
+
+function pickRarity(){
+  return weightedPick(rarities);
+}
+
+function pickColor(rarityKey){
+  const pool = colorPools[rarityKey] || colorPools.common;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function pickHat(){
+  return weightedPick(hatsWeighted).hat;
+}
+
+function makeCatName(){
+  const parts1 = ["Micio","Luna","Puff","Nerino","Zaffiro","Pixel","Menta","Biscotto","Ombra","Sushi","Nube"];
+  const parts2 = ["di Skull","del Giardino","Stellare","Arcobaleno","Silenzioso","Fortunato","Sognatore","d'Inverno","di Primavera","del Mana"];
+  return parts1[Math.floor(Math.random()*parts1.length)] + " " + parts2[Math.floor(Math.random()*parts2.length)];
+}
+
+/* Audio: purr using WebAudio (no files needed) */
+let audioCtx = null;
+function startAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // required on mobile: resume on user gesture
+  if(audioCtx.state === "suspended") audioCtx.resume();
+}
+function playPurr(){
+  if(!soundEnabled) return;
+  startAudio();
+  const ctx = audioCtx;
+
+  // soft noise + low oscillator
+  const duration = 0.55;
+
+  const osc = ctx.createOscillator();
+  osc.type = "sine";
+  osc.frequency.value = 34 + Math.random()*8;
+
+  const gain = ctx.createGain();
+  gain.gain.value = 0;
+
+  // noise buffer
+  const bufferSize = ctx.sampleRate * duration;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++){
+    data[i] = (Math.random()*2-1) * 0.18;
+  }
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = 160;
+
+  osc.connect(gain);
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  const now = ctx.currentTime;
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.18, now + 0.05);
+  gain.gain.linearRampToValueAtTime(0.0, now + duration);
+
+  osc.start(now);
+  noise.start(now);
+  osc.stop(now + duration);
+  noise.stop(now + duration);
+}
+
+function updateCounters(){
+  totalCatsEl.textContent = String(document.querySelectorAll(".cat").length);
+  totalPetsEl.textContent = String(totalPets);
+  btnCenter.disabled = ownedCats.length === 0;
+}
+
+function spawnHeart(x, y){
+  const h = document.createElement("div");
+  h.className = "heart";
+  h.textContent = "💗";
+  h.style.left = (x + rand(-6, 6)) + "px";
+  h.style.top = (y + rand(-10, 2)) + "px";
+  garden.appendChild(h);
+  setTimeout(()=> h.remove(), 900);
+}
+
+function createCat({x, y, owned=false, name=null}){
+  const rarity = pickRarity(); // {key,label}
+  const color = pickColor(rarity.key);
+  const hat = pickHat();
+  const catName = name || makeCatName();
+
+  const cat = document.createElement("div");
+  cat.className = `cat r-${rarity.key}`;
+  cat.style.left = x + "px";
+  cat.style.top = y + "px";
+
+  // Label (rarity + name + pet count)
+  const label = document.createElement("div");
+  label.className = "label";
+  label.innerHTML = `<span>${rarity.label}</span> <span>•</span> <span>${catName}</span> <span class="petcount">0</span>`;
+  cat.appendChild(label);
+
+  // Emoji visual
+  const emoji = document.createElement("div");
+  emoji.className = "emoji";
+  emoji.textContent = hat ? `${hat}🐱` : "🐱";
+  emoji.style.color = color; // colorize emoji (works as text)
+  cat.appendChild(emoji);
+
+  // state
+  cat.dataset.pets = "0";
+  cat.dataset.name = catName;
+  cat.dataset.rarity = rarity.key;
+  cat.dataset.color = color;
+  cat.dataset.hat = hat ? hat : "";
+
+  // owned highlight
+  if(owned){
+    cat.classList.add("owned");
+    ownedCats.push(cat);
+    lastOwnedCat = cat;
+  }
+
+  // interaction: pet
+  cat.addEventListener("click", (ev) => {
+    // click position relative to garden
+    const rect = garden.getBoundingClientRect();
+    const cx = ev.clientX - rect.left;
+    const cy = ev.clientY - rect.top;
+
+    // increment pet count
+    const n = (parseInt(cat.dataset.pets,10) || 0) + 1;
+    cat.dataset.pets = String(n);
+    label.querySelector(".petcount").textContent = String(n);
+    totalPets++;
+    updateCounters();
+
+    // cute bounce
+    emoji.style.transform = "scale(1.18)";
+    setTimeout(()=> emoji.style.transform = "scale(1)", 150);
+
+    // hearts + purr
+    spawnHeart(cx, cy);
+    playPurr();
+  });
+
+  garden.appendChild(cat);
+
+  // wander
+  wander(cat);
+
+  updateCounters();
+  return cat;
+}
+
+function wander(cat){
+  const step = () => {
+    // keep within viewport
+    const maxX = window.innerWidth - 90;
+    const maxY = window.innerHeight - 90;
+    const nx = clamp(rand(20, maxX), 0, maxX);
+    const ny = clamp(rand(60, maxY), 0, maxY);
+
+    // move using transform (smooth)
+    cat.style.transform = `translate(${nx}px, ${ny}px)`;
+  };
+
+  // initial move
+  setTimeout(step, rand(200, 900));
+  setInterval(step, 3600 + Math.random()*1400);
+}
+
+/* Center on owned cat (scroll-less: we "jump" by moving it near center) */
+function centerOn(cat){
+  if(!cat) return;
+  // put lastOwnedCat near center by adjusting its base position left/top
+  const cx = window.innerWidth/2 - 40;
+  const cy = window.innerHeight/2 - 40;
+  cat.style.left = cx + "px";
+  cat.style.top = cy + "px";
+  cat.style.transform = "translate(0,0)";
+  // little sparkle
+  const rect = garden.getBoundingClientRect();
+  spawnHeart(cx + rect.left + 30 - rect.left, cy + rect.top + 10 - rect.top);
+}
+
+/* UI events */
+btnAdopt.addEventListener("click", () => {
+  // On mobile, first click can enable audio context
+  startAudio();
+
+  const x = rand(20, window.innerWidth - 120);
+  const y = rand(80, window.innerHeight - 140);
+  const cat = createCat({x, y, owned:true});
+  centerOn(cat); // show immediately where it is
+});
+
+btnCenter.addEventListener("click", () => {
+  // center last adopted cat
+  centerOn(lastOwnedCat);
+});
+
+btnSound.addEventListener("click", () => {
+  startAudio();
+  soundEnabled = !soundEnabled;
+  btnSound.textContent = soundEnabled ? "🔊 Fusa: ON" : "🔇 Fusa: OFF";
+});
+
+/* Spawn ambient cats */
+for(let i=0;i<7;i++){
+  createCat({
+    x: rand(20, window.innerWidth - 120),
+    y: rand(80, window.innerHeight - 140),
+    owned:false
+  });
+}
+</script>
+</body>
+</html>
