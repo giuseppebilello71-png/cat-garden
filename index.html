@@ -6,128 +6,113 @@
   <title>Cat Garden</title>
   <style>
     :root{
-      --bg1:#b8f7c5;
-      --bg2:#8fd3f4;
-      --panel: rgba(255,255,255,.88);
-      --shadow: 0 8px 22px rgba(0,0,0,.18);
+      --panel: rgba(255,255,255,.9);
+      --shadow: 0 10px 22px rgba(0,0,0,.12);
     }
     body{
-      margin:0;
-      overflow:hidden;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      margin:0; overflow:hidden;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background:#77d88a;
       user-select:none;
     }
-
-    /* Garden */
     #garden{
       position:relative;
-      width:100vw;
-      height:100vh;
+      width:100vw; height:100vh;
+      background:
+        radial-gradient(rgba(255,255,255,.10) 1px, transparent 2px) 0 0/22px 22px,
+        radial-gradient(rgba(0,0,0,.06) 1px, transparent 2px) 10px 8px/18px 18px,
+        linear-gradient(#7be08f,#61d38a);
     }
-    /* subtle grass */
+    /* qualche fiorellino */
     #garden::before{
       content:"";
-      position:absolute;
-      inset:0;
-      background-image:
-        radial-gradient(rgba(0,0,0,.06) 1px, transparent 1px);
-      background-size: 12px 12px;
-      opacity:.35;
-      pointer-events:none;
+      position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 14% 72%, rgba(255,255,255,.25) 0 7px, transparent 8px),
+        radial-gradient(circle at 28% 55%, rgba(255,255,255,.20) 0 6px, transparent 7px),
+        radial-gradient(circle at 62% 68%, rgba(255,255,255,.22) 0 7px, transparent 8px),
+        radial-gradient(circle at 82% 44%, rgba(255,255,255,.18) 0 6px, transparent 7px);
+      opacity:.55; pointer-events:none;
     }
 
-    /* UI */
     #ui{
-      position:fixed;
-      top:14px;
-      left:14px;
-      display:flex;
-      gap:10px;
-      align-items:center;
+      position:fixed; top:12px; left:12px;
+      display:flex; gap:10px; flex-wrap:wrap;
       z-index:10;
-      flex-wrap:wrap;
     }
-    .btn{
-      border:none;
-      border-radius:14px;
-      padding:12px 14px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      font-weight:700;
-      cursor:pointer;
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-    .btn:active{ transform: translateY(1px); }
-
-    #badge{
-      background: var(--panel);
-      border-radius:14px;
+    .btn, .pill{
+      border:none; border-radius:14px;
       padding:10px 12px;
-      box-shadow: var(--shadow);
-      font-size:13px;
-      display:flex;
-      gap:10px;
-      align-items:center;
+      background:var(--panel);
+      box-shadow:var(--shadow);
+      font-weight:800;
+      display:flex; gap:8px; align-items:center;
     }
-    #badge b{ font-size:14px; }
+    .btn{ cursor:pointer; }
+    .btn:active{ transform: translateY(1px); }
+    .pill{ font-size:13px; }
 
-    /* Cat */
+    /* Cat container */
     .cat{
       position:absolute;
-      font-size: 40px;
-      transform: translate(0,0);
-      transition: transform 3.6s linear;
+      width:64px; height:64px;
+      transition: transform 3.2s linear;
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,.22));
       cursor:pointer;
-      filter: drop-shadow(0 6px 6px rgba(0,0,0,.22));
     }
-    .cat .label{
+    .owned{
+      outline:3px solid rgba(255,215,0,.85);
+      outline-offset:6px;
+      border-radius:14px;
+      animation: glow 1.4s ease-in-out infinite alternate;
+    }
+    @keyframes glow{
+      from{ filter: drop-shadow(0 0 8px rgba(255,215,0,.25)) drop-shadow(0 10px 10px rgba(0,0,0,.22)); }
+      to  { filter: drop-shadow(0 0 14px rgba(255,215,0,.55)) drop-shadow(0 10px 10px rgba(0,0,0,.22)); }
+    }
+
+    /* sprite: 4 frame in orizzontale */
+    .sprite{
+      position:absolute;
+      left:50%; top:50%;
+      transform: translate(-50%,-50%);
+      width:48px; height:48px;
+      background-repeat:no-repeat;
+      background-size: calc(48px * 4) 48px;
+      image-rendering: pixelated;
+      animation: walk 520ms steps(4) infinite;
+    }
+    @keyframes walk{
+      from { background-position: 0 0; }
+      to   { background-position: -192px 0; } /* 48*4 */
+    }
+
+    .label{
       position:absolute;
       left:50%;
       transform: translateX(-50%);
       top:-18px;
-      font-size: 11px;
-      font-weight:800;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.90);
+      font-size:11px;
+      font-weight:900;
+      padding:3px 8px;
+      border-radius:999px;
+      background: rgba(255,255,255,.92);
       box-shadow: 0 6px 14px rgba(0,0,0,.12);
       white-space:nowrap;
-      display:flex;
-      gap:6px;
-      align-items:center;
+      display:flex; gap:6px; align-items:center;
     }
-    .cat .petcount{
-      font-weight:900;
-      opacity:.8;
-    }
-    .cat .emoji{
-      display:inline-block;
-      transition: transform .18s ease;
-    }
-    .cat:active .emoji{ transform: scale(1.08); }
+    .petcount{ opacity:.85; font-weight:1000; }
 
-    /* Owned cat highlight */
-    .owned{
-      outline: 3px solid rgba(255,215,0,.85);
-      outline-offset: 6px;
-      border-radius: 18px;
-      animation: glow 1.4s ease-in-out infinite alternate;
-    }
-    @keyframes glow{
-      from{ filter: drop-shadow(0 0 8px rgba(255,215,0,.35)) drop-shadow(0 6px 6px rgba(0,0,0,.22)); }
-      to{ filter: drop-shadow(0 0 14px rgba(255,215,0,.65)) drop-shadow(0 6px 6px rgba(0,0,0,.22)); }
+    .hat{
+      position:absolute;
+      left:50%;
+      transform: translateX(-50%);
+      top:-6px;
+      font-size:16px;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,.2));
+      pointer-events:none;
     }
 
-    /* Rarity colors for label text */
-    .r-common .label{ color:#2f2f2f; }
-    .r-rare .label{ color:#0b63ff; }
-    .r-epic .label{ color:#7b2cbf; }
-    .r-legendary .label{ color:#c97a00; }
-
-    /* Hearts pop */
     .heart{
       position:absolute;
       font-size:18px;
@@ -140,317 +125,297 @@
       15%{ opacity:1; }
       100%{ transform: translateY(-42px) scale(1.25); opacity:0; }
     }
-
-    /* Small footer tip */
-    #tip{
-      position:fixed;
-      bottom:14px;
-      left:14px;
-      background: rgba(255,255,255,.70);
-      border-radius:14px;
-      padding:10px 12px;
-      font-size:12px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.12);
-      z-index:10;
-    }
   </style>
 </head>
 <body>
   <div id="ui">
-    <button class="btn" id="btnAdopt">➕ Adotta un gatto</button>
-    <button class="btn" id="btnCenter" disabled>🎯 Trova il mio gatto</button>
-    <button class="btn" id="btnSound">🔇 Fusa: OFF</button>
-    <div id="badge">
-      <div>🐱 Totale: <b id="totalCats">0</b></div>
-      <div>💗 Coccole: <b id="totalPets">0</b></div>
-    </div>
+    <button class="btn" id="adopt">➕ Adotta un gatto</button>
+    <button class="btn" id="center" disabled>🎯 Trova il mio gatto</button>
+    <button class="btn" id="sound">🔇 Fusa: OFF</button>
+    <div class="pill">🐱 <span id="totCats">0</span> • 💗 <span id="totPets">0</span></div>
   </div>
 
-  <div id="tip">Tocca un gatto per coccolarlo. I cappelli e i colori hanno rarità ✨</div>
-  <div id="garden" aria-label="Cat Garden"></div>
+  <div id="garden"></div>
 
 <script>
-/* -----------------------------
-   Simple single-page prototype
-   - Random rarity colors
-   - Random hats
-   - Pet interaction + hearts
-   - Optional purr sound
-   - Owned cats highlight + center button
-   - Multiple cats per user (you can adopt more)
--------------------------------- */
-
 const garden = document.getElementById("garden");
-const totalCatsEl = document.getElementById("totalCats");
-const totalPetsEl = document.getElementById("totalPets");
-const btnAdopt = document.getElementById("btnAdopt");
-const btnCenter = document.getElementById("btnCenter");
-const btnSound = document.getElementById("btnSound");
+const totCatsEl = document.getElementById("totCats");
+const totPetsEl = document.getElementById("totPets");
+const btnAdopt = document.getElementById("adopt");
+const btnCenter = document.getElementById("center");
+const btnSound = document.getElementById("sound");
 
 let totalPets = 0;
 let soundEnabled = false;
-let ownedCats = [];     // user can have multiple cats
-let lastOwnedCat = null;
 
-// Weighted rarity roll
+let ownedCats = [];
+let lastOwned = null;
+
+/* ----------------- RARITÀ + COLORI ----------------- */
 const rarities = [
-  { key: "common",    label:"COMUNE",     chance: 70 },
-  { key: "rare",      label:"RARA",       chance: 20 },
-  { key: "epic",      label:"EPICA",      chance: 8  },
-  { key: "legendary", label:"LEGGENDARIA",chance: 2  }
+  { key:"COMUNE", chance:70, colors:["#2b2b2b","#f2f2f2","#caa472","#9c7a5b","#bdbdbd"] },
+  { key:"RARA", chance:20, colors:["#4da3ff","#ff4d6d","#00c2a8","#ffd166","#a0c4ff"] },
+  { key:"EPICA", chance:8,  colors:["#7b2cbf","#00bbf9","#ff6d00","#ff00ff","#00ffd5"] },
+  { key:"LEGGENDARIA", chance:2, colors:["#ffd700","#ff1744","#00ff7f","#00e5ff","#ff7b00"] },
 ];
 
-// Colors pool per rarity (including unrealistic colors)
-const colorPools = {
-  common:    ["#2b2b2b","#ffffff","#c49a6c","#8d6e63","#9e9e9e"],
-  rare:      ["#00a8ff","#ff4d6d","#00c2a8","#ffd166","#a0c4ff"],
-  epic:      ["#7b2cbf","#00bbf9","#ff6d00","#ff00ff","#00ffd5"],
-  legendary: ["#ffd700","#ff7b00","#00ff7f","#00e5ff","#ff1744"]
-};
-
-// Hats weighted (null = no hat)
-const hatsWeighted = [
-  { hat: null, chance: 55 },
-  { hat: "🎩", chance: 10 },
-  { hat: "👑", chance: 3  },
-  { hat: "🧢", chance: 10 },
-  { hat: "🎀", chance: 8  },
-  { hat: "🌸", chance: 8  },
-  { hat: "🎓", chance: 4  },
-  { hat: "✨", chance: 2  }
+const hats = [
+  { hat:null, chance:55 },
+  { hat:"🎩", chance:10 },
+  { hat:"🧢", chance:10 },
+  { hat:"🎀", chance:8 },
+  { hat:"🌸", chance:8 },
+  { hat:"🎓", chance:4 },
+  { hat:"👑", chance:3 },
+  { hat:"✨", chance:2 }
 ];
 
-function rand(min, max){ return Math.random() * (max - min) + min; }
-function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
 function weightedPick(list){
-  const roll = Math.random() * 100;
-  let sum = 0;
-  for(const item of list){
-    sum += item.chance;
-    if(roll <= sum) return item;
+  const roll = Math.random()*100;
+  let sum=0;
+  for(const it of list){
+    sum += it.chance;
+    if(roll <= sum) return it;
   }
-  return list[list.length - 1];
+  return list[list.length-1];
 }
 
-function pickRarity(){
-  return weightedPick(rarities);
+function makeName(){
+  const a=["Micio","Luna","Puff","Nerino","Zaffiro","Pixel","Menta","Biscotto","Ombra","Sushi","Nube"];
+  const b=["del Giardino","Stellare","Arcobaleno","Silenzioso","Fortunato","Sognatore","d'Inverno","di Primavera","del Mana"];
+  return a[Math.floor(Math.random()*a.length)]+" "+b[Math.floor(Math.random()*b.length)];
 }
 
-function pickColor(rarityKey){
-  const pool = colorPools[rarityKey] || colorPools.common;
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-function pickHat(){
-  return weightedPick(hatsWeighted).hat;
-}
-
-function makeCatName(){
-  const parts1 = ["Micio","Luna","Puff","Nerino","Zaffiro","Pixel","Menta","Biscotto","Ombra","Sushi","Nube"];
-  const parts2 = ["di Skull","del Giardino","Stellare","Arcobaleno","Silenzioso","Fortunato","Sognatore","d'Inverno","di Primavera","del Mana"];
-  return parts1[Math.floor(Math.random()*parts1.length)] + " " + parts2[Math.floor(Math.random()*parts2.length)];
-}
-
-/* Audio: purr using WebAudio (no files needed) */
-let audioCtx = null;
+/* ----------------- PURR (audio) ----------------- */
+let audioCtx=null;
 function startAudio(){
-  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  // required on mobile: resume on user gesture
-  if(audioCtx.state === "suspended") audioCtx.resume();
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended") audioCtx.resume();
 }
 function playPurr(){
   if(!soundEnabled) return;
   startAudio();
-  const ctx = audioCtx;
+  const ctx=audioCtx, duration=.55;
 
-  // soft noise + low oscillator
-  const duration = 0.55;
+  const osc=ctx.createOscillator();
+  osc.type="sine";
+  osc.frequency.value=34+Math.random()*8;
 
-  const osc = ctx.createOscillator();
-  osc.type = "sine";
-  osc.frequency.value = 34 + Math.random()*8;
+  const gain=ctx.createGain();
+  gain.gain.value=0;
 
-  const gain = ctx.createGain();
-  gain.gain.value = 0;
+  const bufferSize = ctx.sampleRate*duration;
+  const buffer=ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data=buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1)*0.18;
+  const noise=ctx.createBufferSource(); noise.buffer=buffer;
 
-  // noise buffer
-  const bufferSize = ctx.sampleRate * duration;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for(let i=0;i<bufferSize;i++){
-    data[i] = (Math.random()*2-1) * 0.18;
-  }
-  const noise = ctx.createBufferSource();
-  noise.buffer = buffer;
-
-  const filter = ctx.createBiquadFilter();
-  filter.type = "lowpass";
-  filter.frequency.value = 160;
+  const filter=ctx.createBiquadFilter();
+  filter.type="lowpass"; filter.frequency.value=160;
 
   osc.connect(gain);
-  noise.connect(filter);
-  filter.connect(gain);
+  noise.connect(filter); filter.connect(gain);
   gain.connect(ctx.destination);
 
-  const now = ctx.currentTime;
+  const now=ctx.currentTime;
   gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.18, now + 0.05);
-  gain.gain.linearRampToValueAtTime(0.0, now + duration);
+  gain.gain.linearRampToValueAtTime(.18, now+.05);
+  gain.gain.linearRampToValueAtTime(0, now+duration);
 
-  osc.start(now);
-  noise.start(now);
-  osc.stop(now + duration);
-  noise.stop(now + duration);
+  osc.start(now); noise.start(now);
+  osc.stop(now+duration); noise.stop(now+duration);
 }
 
+/* ----------------- SPRITE GENERATOR -----------------
+   Genera una sprite-sheet 4 frame (48x48 ogni frame) stile pixel.
+   (Canvas -> dataURL). Così non scarichi immagini.
+------------------------------------------------------ */
+function makeCatSpriteSheet(colorHex){
+  const frameW=48, frameH=48, frames=4;
+  const c=document.createElement("canvas");
+  c.width=frameW*frames; c.height=frameH;
+  const ctx=c.getContext("2d");
+
+  function px(x,y,w,h,col){
+    ctx.fillStyle=col;
+    ctx.fillRect(x,y,w,h);
+  }
+
+  const outline="rgba(0,0,0,.28)";
+  const eye="#121212";
+  const nose="#f0a";
+
+  for(let f=0; f<frames; f++){
+    const ox=f*frameW;
+    // clear frame
+    ctx.clearRect(ox,0,frameW,frameH);
+
+    // "bounce" e "passi": muove zampette
+    const step = f%2===0 ? 0 : 2;
+
+    // corpo (pixel block)
+    // testa
+    px(ox+14, 14, 20, 18, colorHex);
+    // orecchie
+    px(ox+14, 10, 6, 6, colorHex);
+    px(ox+28, 10, 6, 6, colorHex);
+    // corpo
+    px(ox+16, 30, 18, 10, colorHex);
+    // coda
+    px(ox+34, 32, 6, 6, colorHex);
+
+    // zampe (alternate)
+    px(ox+16, 40, 4, 4, colorHex);
+    px(ox+22, 40-step, 4, 4, colorHex);
+    px(ox+28, 40, 4, 4, colorHex);
+    px(ox+34, 40-step, 4, 4, colorHex);
+
+    // outline (semplice)
+    ctx.strokeStyle = outline;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(ox+14,14,20,18);
+    ctx.strokeRect(ox+16,30,18,10);
+
+    // occhi
+    px(ox+20, 22, 2, 2, eye);
+    px(ox+28, 22, 2, 2, eye);
+    // naso
+    px(ox+24, 26, 2, 2, nose);
+
+    // piccoli highlights
+    px(ox+17, 17, 2, 2, "rgba(255,255,255,.25)");
+  }
+
+  return c.toDataURL("image/png");
+}
+
+/* ----------------- UI HELPERS ----------------- */
 function updateCounters(){
-  totalCatsEl.textContent = String(document.querySelectorAll(".cat").length);
-  totalPetsEl.textContent = String(totalPets);
-  btnCenter.disabled = ownedCats.length === 0;
+  totCatsEl.textContent = String(document.querySelectorAll(".cat").length);
+  totPetsEl.textContent = String(totalPets);
+  btnCenter.disabled = ownedCats.length===0;
 }
 
-function spawnHeart(x, y){
-  const h = document.createElement("div");
-  h.className = "heart";
-  h.textContent = "💗";
-  h.style.left = (x + rand(-6, 6)) + "px";
-  h.style.top = (y + rand(-10, 2)) + "px";
+function heartAt(x,y){
+  const h=document.createElement("div");
+  h.className="heart";
+  h.textContent="💗";
+  h.style.left=(x+rand(-6,6))+"px";
+  h.style.top=(y+rand(-10,2))+"px";
   garden.appendChild(h);
-  setTimeout(()=> h.remove(), 900);
+  setTimeout(()=>h.remove(), 900);
 }
 
-function createCat({x, y, owned=false, name=null}){
-  const rarity = pickRarity(); // {key,label}
-  const color = pickColor(rarity.key);
-  const hat = pickHat();
-  const catName = name || makeCatName();
+/* Muove il gatto e lo "gira" se va a sinistra/destra */
+function wander(cat){
+  let prevX = 0;
 
-  const cat = document.createElement("div");
-  cat.className = `cat r-${rarity.key}`;
-  cat.style.left = x + "px";
-  cat.style.top = y + "px";
+  const step=()=>{
+    const maxX=window.innerWidth-90, maxY=window.innerHeight-90;
+    const nx=clamp(rand(20,maxX),0,maxX);
+    const ny=clamp(rand(80,maxY),0,maxY);
 
-  // Label (rarity + name + pet count)
-  const label = document.createElement("div");
-  label.className = "label";
-  label.innerHTML = `<span>${rarity.label}</span> <span>•</span> <span>${catName}</span> <span class="petcount">0</span>`;
-  cat.appendChild(label);
+    // direzione
+    const dx = nx - prevX;
+    prevX = nx;
+    const flip = dx < 0 ? -1 : 1;
 
-  // Emoji visual
-  const emoji = document.createElement("div");
-  emoji.className = "emoji";
-  emoji.textContent = hat ? `${hat}🐱` : "🐱";
-  emoji.style.color = color; // colorize emoji (works as text)
-  cat.appendChild(emoji);
+    // trasformazione: translate + flip (mantiene camminata sprite)
+    cat.style.transform = `translate(${nx}px, ${ny}px) scaleX(${flip})`;
+  };
 
-  // state
-  cat.dataset.pets = "0";
-  cat.dataset.name = catName;
-  cat.dataset.rarity = rarity.key;
-  cat.dataset.color = color;
-  cat.dataset.hat = hat ? hat : "";
+  setTimeout(step, rand(200,900));
+  setInterval(step, 3200 + Math.random()*1200);
+}
 
-  // owned highlight
+function centerOn(cat){
+  if(!cat) return;
+  const cx=window.innerWidth/2-32;
+  const cy=window.innerHeight/2-32;
+  cat.style.left=cx+"px";
+  cat.style.top=cy+"px";
+  cat.style.transform="translate(0,0) scaleX(1)";
+}
+
+/* ----------------- CREATE CAT ----------------- */
+function createCat({owned=false}){
+  const rarity = weightedPick(rarities);
+  const color = rarity.colors[Math.floor(Math.random()*rarity.colors.length)];
+  const hat = weightedPick(hats).hat;
+  const name = makeName();
+
+  const cat=document.createElement("div");
+  cat.className="cat";
+  cat.style.left = rand(20, window.innerWidth-120) + "px";
+  cat.style.top  = rand(80, window.innerHeight-140) + "px";
+
   if(owned){
     cat.classList.add("owned");
     ownedCats.push(cat);
-    lastOwnedCat = cat;
+    lastOwned = cat;
   }
 
-  // interaction: pet
-  cat.addEventListener("click", (ev) => {
-    // click position relative to garden
-    const rect = garden.getBoundingClientRect();
-    const cx = ev.clientX - rect.left;
-    const cy = ev.clientY - rect.top;
+  const label=document.createElement("div");
+  label.className="label";
+  label.innerHTML = `<span>${rarity.key}</span> • <span>${name}</span> • <span class="petcount">0</span>`;
+  cat.appendChild(label);
 
-    // increment pet count
-    const n = (parseInt(cat.dataset.pets,10) || 0) + 1;
-    cat.dataset.pets = String(n);
+  if(hat){
+    const h=document.createElement("div");
+    h.className="hat";
+    h.textContent=hat;
+    cat.appendChild(h);
+  }
+
+  const sprite=document.createElement("div");
+  sprite.className="sprite";
+  sprite.style.backgroundImage = `url(${makeCatSpriteSheet(color)})`;
+  cat.appendChild(sprite);
+
+  cat.dataset.pets="0";
+
+  cat.addEventListener("click",(ev)=>{
+    const rect=garden.getBoundingClientRect();
+    const cx=ev.clientX-rect.left;
+    const cy=ev.clientY-rect.top;
+
+    const n=(parseInt(cat.dataset.pets,10)||0)+1;
+    cat.dataset.pets=String(n);
     label.querySelector(".petcount").textContent = String(n);
+
     totalPets++;
     updateCounters();
 
-    // cute bounce
-    emoji.style.transform = "scale(1.18)";
-    setTimeout(()=> emoji.style.transform = "scale(1)", 150);
-
-    // hearts + purr
-    spawnHeart(cx, cy);
+    heartAt(cx,cy);
     playPurr();
   });
 
   garden.appendChild(cat);
-
-  // wander
   wander(cat);
-
   updateCounters();
   return cat;
 }
 
-function wander(cat){
-  const step = () => {
-    // keep within viewport
-    const maxX = window.innerWidth - 90;
-    const maxY = window.innerHeight - 90;
-    const nx = clamp(rand(20, maxX), 0, maxX);
-    const ny = clamp(rand(60, maxY), 0, maxY);
-
-    // move using transform (smooth)
-    cat.style.transform = `translate(${nx}px, ${ny}px)`;
-  };
-
-  // initial move
-  setTimeout(step, rand(200, 900));
-  setInterval(step, 3600 + Math.random()*1400);
-}
-
-/* Center on owned cat (scroll-less: we "jump" by moving it near center) */
-function centerOn(cat){
-  if(!cat) return;
-  // put lastOwnedCat near center by adjusting its base position left/top
-  const cx = window.innerWidth/2 - 40;
-  const cy = window.innerHeight/2 - 40;
-  cat.style.left = cx + "px";
-  cat.style.top = cy + "px";
-  cat.style.transform = "translate(0,0)";
-  // little sparkle
-  const rect = garden.getBoundingClientRect();
-  spawnHeart(cx + rect.left + 30 - rect.left, cy + rect.top + 10 - rect.top);
-}
-
-/* UI events */
-btnAdopt.addEventListener("click", () => {
-  // On mobile, first click can enable audio context
+/* ----------------- UI EVENTS ----------------- */
+btnAdopt.addEventListener("click", ()=>{
   startAudio();
-
-  const x = rand(20, window.innerWidth - 120);
-  const y = rand(80, window.innerHeight - 140);
-  const cat = createCat({x, y, owned:true});
-  centerOn(cat); // show immediately where it is
+  const c = createCat({owned:true});
+  centerOn(c); // subito visibile
 });
 
-btnCenter.addEventListener("click", () => {
-  // center last adopted cat
-  centerOn(lastOwnedCat);
-});
+btnCenter.addEventListener("click", ()=> centerOn(lastOwned));
 
-btnSound.addEventListener("click", () => {
+btnSound.addEventListener("click", ()=>{
   startAudio();
   soundEnabled = !soundEnabled;
   btnSound.textContent = soundEnabled ? "🔊 Fusa: ON" : "🔇 Fusa: OFF";
 });
 
-/* Spawn ambient cats */
-for(let i=0;i<7;i++){
-  createCat({
-    x: rand(20, window.innerWidth - 120),
-    y: rand(80, window.innerHeight - 140),
-    owned:false
-  });
-}
+/* ambient cats */
+for(let i=0;i<7;i++) createCat({owned:false});
 </script>
 </body>
 </html>
