@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
   <title>Cat Garden</title>
   <style>
     :root{
@@ -10,81 +10,105 @@
       --shadow: 0 10px 22px rgba(0,0,0,.12);
     }
     body{
-      margin:0; overflow:hidden;
+      margin:0;
+      overflow:hidden;
       font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background:#77d88a;
+      background:#6ed38b;
       user-select:none;
-    }
-    #garden{
-      position:relative;
-      width:100vw; height:100vh;
-      background:
-        radial-gradient(rgba(255,255,255,.10) 1px, transparent 2px) 0 0/22px 22px,
-        radial-gradient(rgba(0,0,0,.06) 1px, transparent 2px) 10px 8px/18px 18px,
-        linear-gradient(#7be08f,#61d38a);
-    }
-    /* qualche fiorellino */
-    #garden::before{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(circle at 14% 72%, rgba(255,255,255,.25) 0 7px, transparent 8px),
-        radial-gradient(circle at 28% 55%, rgba(255,255,255,.20) 0 6px, transparent 7px),
-        radial-gradient(circle at 62% 68%, rgba(255,255,255,.22) 0 7px, transparent 8px),
-        radial-gradient(circle at 82% 44%, rgba(255,255,255,.18) 0 6px, transparent 7px);
-      opacity:.55; pointer-events:none;
+      -webkit-user-select:none;
+      touch-action:none;
     }
 
+    /* UI */
     #ui{
-      position:fixed; top:12px; left:12px;
-      display:flex; gap:10px; flex-wrap:wrap;
-      z-index:10;
+      position:fixed;
+      top:12px; left:12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      z-index:20;
+      align-items:center;
     }
-    .btn, .pill{
-      border:none; border-radius:14px;
+    .btn,.pill{
+      border:none;
+      border-radius:14px;
       padding:10px 12px;
       background:var(--panel);
       box-shadow:var(--shadow);
       font-weight:800;
-      display:flex; gap:8px; align-items:center;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-size:14px;
     }
     .btn{ cursor:pointer; }
     .btn:active{ transform: translateY(1px); }
     .pill{ font-size:13px; }
 
-    /* Cat container */
+    /* Viewport + world (giardino grande) */
+    #viewport{
+      position:relative;
+      width:100vw;
+      height:100vh;
+      overflow:hidden;
+      touch-action:none;
+    }
+    /* prato pixel stile “foto esempio” */
+    #world{
+      position:absolute;
+      left:0; top:0;
+      width:3000px;
+      height:3000px;
+      background:
+        radial-gradient(rgba(255,255,255,.10) 1px, transparent 2px) 0 0/20px 20px,
+        radial-gradient(rgba(0,0,0,.07) 1px, transparent 2px) 8px 10px/22px 22px,
+        linear-gradient(#7adf92,#5fd786);
+    }
+    /* qualche dettaglio (chiazze/fiorellini) */
+    #world::before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 12% 24%, rgba(255,255,255,.14) 0 10px, transparent 11px),
+        radial-gradient(circle at 22% 78%, rgba(255,255,255,.12) 0 8px, transparent 9px),
+        radial-gradient(circle at 68% 52%, rgba(255,255,255,.12) 0 12px, transparent 13px),
+        radial-gradient(circle at 84% 18%, rgba(255,255,255,.10) 0 9px, transparent 10px),
+        radial-gradient(circle at 45% 40%, rgba(0,0,0,.05) 0 18px, transparent 19px),
+        radial-gradient(circle at 75% 70%, rgba(0,0,0,.04) 0 16px, transparent 17px);
+      opacity:.7;
+      pointer-events:none;
+    }
+
+    /* Cat */
     .cat{
       position:absolute;
-      width:64px; height:64px;
-      transition: transform 3.2s linear;
-      filter: drop-shadow(0 10px 10px rgba(0,0,0,.22));
+      width:64px;
+      height:64px;
       cursor:pointer;
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,.22));
+      transition: transform 6.5s linear;
     }
     .owned{
       outline:3px solid rgba(255,215,0,.85);
       outline-offset:6px;
       border-radius:14px;
-      animation: glow 1.4s ease-in-out infinite alternate;
-    }
-    @keyframes glow{
-      from{ filter: drop-shadow(0 0 8px rgba(255,215,0,.25)) drop-shadow(0 10px 10px rgba(0,0,0,.22)); }
-      to  { filter: drop-shadow(0 0 14px rgba(255,215,0,.55)) drop-shadow(0 10px 10px rgba(0,0,0,.22)); }
     }
 
-    /* sprite: 4 frame in orizzontale */
     .sprite{
       position:absolute;
-      left:50%; top:50%;
+      left:50%;
+      top:50%;
       transform: translate(-50%,-50%);
-      width:48px; height:48px;
+      width:48px;
+      height:48px;
       background-repeat:no-repeat;
       background-size: calc(48px * 4) 48px;
       image-rendering: pixelated;
-      animation: walk 520ms steps(4) infinite;
+      animation: walk 900ms steps(4) infinite;
     }
     @keyframes walk{
-      from { background-position: 0 0; }
-      to   { background-position: -192px 0; } /* 48*4 */
+      from{ background-position: 0 0; }
+      to{ background-position: -192px 0; }
     }
 
     .label{
@@ -99,19 +123,11 @@
       background: rgba(255,255,255,.92);
       box-shadow: 0 6px 14px rgba(0,0,0,.12);
       white-space:nowrap;
-      display:flex; gap:6px; align-items:center;
+      display:flex;
+      gap:6px;
+      align-items:center;
     }
     .petcount{ opacity:.85; font-weight:1000; }
-
-    .hat{
-      position:absolute;
-      left:50%;
-      transform: translateX(-50%);
-      top:-6px;
-      font-size:16px;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,.2));
-      pointer-events:none;
-    }
 
     .heart{
       position:absolute;
@@ -125,115 +141,158 @@
       15%{ opacity:1; }
       100%{ transform: translateY(-42px) scale(1.25); opacity:0; }
     }
+
+    /* Modale nome */
+    #modalBackdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:50;
+      padding:18px;
+    }
+    #modal{
+      width:min(520px, 100%);
+      background: rgba(255,255,255,.96);
+      border-radius:18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.25);
+      padding:16px;
+    }
+    #modal h3{ margin:0 0 10px 0; font-size:16px; }
+    #nameInput{
+      width:100%;
+      box-sizing:border-box;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(0,0,0,.15);
+      font-size:16px;
+      outline:none;
+    }
+    #modalActions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top:12px;
+    }
   </style>
 </head>
 <body>
+
   <div id="ui">
     <button class="btn" id="adopt">➕ Adotta un gatto</button>
     <button class="btn" id="center" disabled>🎯 Trova il mio gatto</button>
-    <button class="btn" id="sound">🔇 Fusa: OFF</button>
     <div class="pill">🐱 <span id="totCats">0</span> • 💗 <span id="totPets">0</span></div>
   </div>
 
-  <div id="garden"></div>
+  <div id="viewport">
+    <div id="world"></div>
+  </div>
+
+  <!-- Modale nome -->
+  <div id="modalBackdrop">
+    <div id="modal">
+      <h3>Come vuoi chiamare il tuo gatto?</h3>
+      <input id="nameInput" placeholder="Es. Muffin, Luna, Pixel..." maxlength="20" />
+      <div id="modalActions">
+        <button class="btn" id="cancelName">Annulla</button>
+        <button class="btn" id="confirmName">Conferma</button>
+      </div>
+    </div>
+  </div>
 
 <script>
-const garden = document.getElementById("garden");
+/* =========================
+   CONFIG
+========================= */
+const WORLD_W = 3000;
+const WORLD_H = 3000;
+
+const AMBIENT_CATS = 10;          // più “vivo”
+const MOVE_EVERY_MS_MIN = 6500;   // più lento
+const MOVE_EVERY_MS_MAX = 9500;
+const MOVE_RADIUS = 220;          // quanto “vaga” ogni volta
+
+/* =========================
+   DOM
+========================= */
+const viewport = document.getElementById("viewport");
+const world = document.getElementById("world");
 const totCatsEl = document.getElementById("totCats");
 const totPetsEl = document.getElementById("totPets");
 const btnAdopt = document.getElementById("adopt");
 const btnCenter = document.getElementById("center");
-const btnSound = document.getElementById("sound");
 
+const modalBackdrop = document.getElementById("modalBackdrop");
+const nameInput = document.getElementById("nameInput");
+const cancelName = document.getElementById("cancelName");
+const confirmName = document.getElementById("confirmName");
+
+/* =========================
+   STATE
+========================= */
 let totalPets = 0;
-let soundEnabled = false;
-
 let ownedCats = [];
 let lastOwned = null;
 
-/* ----------------- RARITÀ + COLORI ----------------- */
-const rarities = [
-  { key:"COMUNE", chance:70, colors:["#2b2b2b","#f2f2f2","#caa472","#9c7a5b","#bdbdbd"] },
-  { key:"RARA", chance:20, colors:["#4da3ff","#ff4d6d","#00c2a8","#ffd166","#a0c4ff"] },
-  { key:"EPICA", chance:8,  colors:["#7b2cbf","#00bbf9","#ff6d00","#ff00ff","#00ffd5"] },
-  { key:"LEGGENDARIA", chance:2, colors:["#ffd700","#ff1744","#00ff7f","#00e5ff","#ff7b00"] },
-];
+// camera (trascinabile)
+let camX = (WORLD_W/2) - (window.innerWidth/2);
+let camY = (WORLD_H/2) - (window.innerHeight/2);
+let dragging = false;
+let startPX = 0, startPY = 0;
+let startCamX = 0, startCamY = 0;
 
-const hats = [
-  { hat:null, chance:55 },
-  { hat:"🎩", chance:10 },
-  { hat:"🧢", chance:10 },
-  { hat:"🎀", chance:8 },
-  { hat:"🌸", chance:8 },
-  { hat:"🎓", chance:4 },
-  { hat:"👑", chance:3 },
-  { hat:"✨", chance:2 }
-];
+// adozione con nome
+let pendingAdopt = false;
 
-function rand(min,max){ return Math.random()*(max-min)+min; }
+/* =========================
+   UTIL
+========================= */
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function randi(min,max){ return Math.floor(rand(min,max)); }
 
-function weightedPick(list){
-  const roll = Math.random()*100;
-  let sum=0;
-  for(const it of list){
-    sum += it.chance;
-    if(roll <= sum) return it;
-  }
-  return list[list.length-1];
+function updateCounters(){
+  totCatsEl.textContent = String(document.querySelectorAll(".cat").length);
+  totPetsEl.textContent = String(totalPets);
+  btnCenter.disabled = ownedCats.length === 0;
 }
 
-function makeName(){
-  const a=["Micio","Luna","Puff","Nerino","Zaffiro","Pixel","Menta","Biscotto","Ombra","Sushi","Nube"];
-  const b=["del Giardino","Stellare","Arcobaleno","Silenzioso","Fortunato","Sognatore","d'Inverno","di Primavera","del Mana"];
-  return a[Math.floor(Math.random()*a.length)]+" "+b[Math.floor(Math.random()*b.length)];
+function setCamera(x,y){
+  camX = clamp(x, 0, WORLD_W - window.innerWidth);
+  camY = clamp(y, 0, WORLD_H - window.innerHeight);
+  world.style.transform = `translate(${-camX}px, ${-camY}px)`;
 }
 
-/* ----------------- PURR (audio) ----------------- */
-let audioCtx=null;
-function startAudio(){
-  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==="suspended") audioCtx.resume();
-}
-function playPurr(){
-  if(!soundEnabled) return;
-  startAudio();
-  const ctx=audioCtx, duration=.55;
-
-  const osc=ctx.createOscillator();
-  osc.type="sine";
-  osc.frequency.value=34+Math.random()*8;
-
-  const gain=ctx.createGain();
-  gain.gain.value=0;
-
-  const bufferSize = ctx.sampleRate*duration;
-  const buffer=ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data=buffer.getChannelData(0);
-  for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1)*0.18;
-  const noise=ctx.createBufferSource(); noise.buffer=buffer;
-
-  const filter=ctx.createBiquadFilter();
-  filter.type="lowpass"; filter.frequency.value=160;
-
-  osc.connect(gain);
-  noise.connect(filter); filter.connect(gain);
-  gain.connect(ctx.destination);
-
-  const now=ctx.currentTime;
-  gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(.18, now+.05);
-  gain.gain.linearRampToValueAtTime(0, now+duration);
-
-  osc.start(now); noise.start(now);
-  osc.stop(now+duration); noise.stop(now+duration);
+function centerCameraOnWorldPoint(wx, wy){
+  setCamera(wx - window.innerWidth/2, wy - window.innerHeight/2);
 }
 
-/* ----------------- SPRITE GENERATOR -----------------
-   Genera una sprite-sheet 4 frame (48x48 ogni frame) stile pixel.
-   (Canvas -> dataURL). Così non scarichi immagini.
------------------------------------------------------- */
-function makeCatSpriteSheet(colorHex){
+function worldPointFromViewport(clientX, clientY){
+  // coordinate nel mondo
+  const wx = clientX + camX;
+  const wy = clientY + camY;
+  return {wx, wy};
+}
+
+function heartAtWorld(wx, wy){
+  const h = document.createElement("div");
+  h.className = "heart";
+  h.textContent = "💗";
+  // posiziona nel mondo (quindi dentro #world)
+  h.style.left = (wx + rand(-6,6)) + "px";
+  h.style.top  = (wy + rand(-10,2)) + "px";
+  world.appendChild(h);
+  setTimeout(()=>h.remove(), 900);
+}
+
+/* =========================
+   SPRITE (GATTO SAGOMATO, NON QUADRATO)
+   - canvas con trasparenza
+   - 4 frame, zampette alternate
+========================= */
+function makeCatSpriteSheet(coat){
   const frameW=48, frameH=48, frames=4;
   const c=document.createElement("canvas");
   c.width=frameW*frames; c.height=frameH;
@@ -245,112 +304,79 @@ function makeCatSpriteSheet(colorHex){
   }
 
   const outline="rgba(0,0,0,.28)";
-  const eye="#121212";
-  const nose="#f0a";
+  const eye="#1a1a1a";
+  const nose="#ff5da2";
+  const highlight="rgba(255,255,255,.22)";
 
   for(let f=0; f<frames; f++){
     const ox=f*frameW;
-    // clear frame
     ctx.clearRect(ox,0,frameW,frameH);
 
-    // "bounce" e "passi": muove zampette
-    const step = f%2===0 ? 0 : 2;
+    const step = (f%2===0) ? 0 : 2;
 
-    // corpo (pixel block)
-    // testa
-    px(ox+14, 14, 20, 18, colorHex);
-    // orecchie
-    px(ox+14, 10, 6, 6, colorHex);
-    px(ox+28, 10, 6, 6, colorHex);
+    // --- corpo sagomato (con “vuoti” attorno = trasparenza)
+    // orecchie (triangolini pixel)
+    px(ox+14, 11, 6, 6, coat);
+    px(ox+28, 11, 6, 6, coat);
+
+    // testa (arrotondata a pixel)
+    px(ox+14, 16, 20, 14, coat);
+    px(ox+16, 14, 16, 2, coat);
+
     // corpo
-    px(ox+16, 30, 18, 10, colorHex);
-    // coda
-    px(ox+34, 32, 6, 6, colorHex);
+    px(ox+16, 30, 18, 10, coat);
+    px(ox+18, 28, 14, 2, coat);
+
+    // coda (staccata, dà silhouette “gatto”)
+    px(ox+34, 32, 6, 2, coat);
+    px(ox+38, 30, 2, 8, coat);
 
     // zampe (alternate)
-    px(ox+16, 40, 4, 4, colorHex);
-    px(ox+22, 40-step, 4, 4, colorHex);
-    px(ox+28, 40, 4, 4, colorHex);
-    px(ox+34, 40-step, 4, 4, colorHex);
+    px(ox+18, 40, 4, 4, coat);
+    px(ox+24, 40-step, 4, 4, coat);
+    px(ox+30, 40, 4, 4, coat);
 
-    // outline (semplice)
+    // outline leggero (solo su alcuni blocchi per non “squadrarlo”)
     ctx.strokeStyle = outline;
     ctx.lineWidth = 2;
-    ctx.strokeRect(ox+14,14,20,18);
+    ctx.strokeRect(ox+14,16,20,14);
     ctx.strokeRect(ox+16,30,18,10);
 
-    // occhi
+    // faccia
     px(ox+20, 22, 2, 2, eye);
     px(ox+28, 22, 2, 2, eye);
-    // naso
-    px(ox+24, 26, 2, 2, nose);
+    px(ox+24, 25, 2, 2, nose);
 
-    // piccoli highlights
-    px(ox+17, 17, 2, 2, "rgba(255,255,255,.25)");
+    // highlight
+    px(ox+18, 18, 2, 2, highlight);
   }
 
   return c.toDataURL("image/png");
 }
 
-/* ----------------- UI HELPERS ----------------- */
-function updateCounters(){
-  totCatsEl.textContent = String(document.querySelectorAll(".cat").length);
-  totPetsEl.textContent = String(totalPets);
-  btnCenter.disabled = ownedCats.length===0;
+/* =========================
+   COLORI PELO CASUALI (senza rarità)
+========================= */
+const COATS = [
+  "#2b2b2b", "#f2f2f2", "#caa472", "#9c7a5b", "#bdbdbd",
+  "#ffb703", "#ff006e", "#8338ec", "#3a86ff", "#06d6a0",
+  "#ff7b00", "#00e5ff"
+];
+
+function randomCoat(){
+  return COATS[randi(0, COATS.length)];
 }
 
-function heartAt(x,y){
-  const h=document.createElement("div");
-  h.className="heart";
-  h.textContent="💗";
-  h.style.left=(x+rand(-6,6))+"px";
-  h.style.top=(y+rand(-10,2))+"px";
-  garden.appendChild(h);
-  setTimeout(()=>h.remove(), 900);
-}
+/* =========================
+   CREATE CAT
+========================= */
+function createCat({owned=false, name="Gatto"}){
+  const coat = randomCoat();
 
-/* Muove il gatto e lo "gira" se va a sinistra/destra */
-function wander(cat){
-  let prevX = 0;
-
-  const step=()=>{
-    const maxX=window.innerWidth-90, maxY=window.innerHeight-90;
-    const nx=clamp(rand(20,maxX),0,maxX);
-    const ny=clamp(rand(80,maxY),0,maxY);
-
-    // direzione
-    const dx = nx - prevX;
-    prevX = nx;
-    const flip = dx < 0 ? -1 : 1;
-
-    // trasformazione: translate + flip (mantiene camminata sprite)
-    cat.style.transform = `translate(${nx}px, ${ny}px) scaleX(${flip})`;
-  };
-
-  setTimeout(step, rand(200,900));
-  setInterval(step, 3200 + Math.random()*1200);
-}
-
-function centerOn(cat){
-  if(!cat) return;
-  const cx=window.innerWidth/2-32;
-  const cy=window.innerHeight/2-32;
-  cat.style.left=cx+"px";
-  cat.style.top=cy+"px";
-  cat.style.transform="translate(0,0) scaleX(1)";
-}
-
-/* ----------------- CREATE CAT ----------------- */
-function createCat({owned=false}){
-  const rarity = weightedPick(rarities);
-  const color = rarity.colors[Math.floor(Math.random()*rarity.colors.length)];
-  const hat = weightedPick(hats).hat;
-  const name = makeName();
-
-  const cat=document.createElement("div");
-  cat.className="cat";
-  cat.style.left = rand(20, window.innerWidth-120) + "px";
-  cat.style.top  = rand(80, window.innerHeight-140) + "px";
+  const cat = document.createElement("div");
+  cat.className = "cat";
+  cat.style.left = randi(80, WORLD_W-120) + "px";
+  cat.style.top  = randi(80, WORLD_H-120) + "px";
 
   if(owned){
     cat.classList.add("owned");
@@ -358,64 +384,156 @@ function createCat({owned=false}){
     lastOwned = cat;
   }
 
-  const label=document.createElement("div");
-  label.className="label";
-  label.innerHTML = `<span>${rarity.key}</span> • <span>${name}</span> • <span class="petcount">0</span>`;
+  const label = document.createElement("div");
+  label.className = "label";
+  label.innerHTML = `<span>${name}</span> • <span class="petcount">0</span>`;
   cat.appendChild(label);
 
-  if(hat){
-    const h=document.createElement("div");
-    h.className="hat";
-    h.textContent=hat;
-    cat.appendChild(h);
-  }
-
-  const sprite=document.createElement("div");
-  sprite.className="sprite";
-  sprite.style.backgroundImage = `url(${makeCatSpriteSheet(color)})`;
+  const sprite = document.createElement("div");
+  sprite.className = "sprite";
+  sprite.style.backgroundImage = `url(${makeCatSpriteSheet(coat)})`;
   cat.appendChild(sprite);
 
-  cat.dataset.pets="0";
+  cat.dataset.pets = "0";
+  cat.dataset.name = name;
 
-  cat.addEventListener("click",(ev)=>{
-    const rect=garden.getBoundingClientRect();
-    const cx=ev.clientX-rect.left;
-    const cy=ev.clientY-rect.top;
+  cat.addEventListener("click", (ev)=>{
+    const {wx, wy} = worldPointFromViewport(ev.clientX, ev.clientY);
 
-    const n=(parseInt(cat.dataset.pets,10)||0)+1;
-    cat.dataset.pets=String(n);
+    const n = (parseInt(cat.dataset.pets,10) || 0) + 1;
+    cat.dataset.pets = String(n);
     label.querySelector(".petcount").textContent = String(n);
 
     totalPets++;
     updateCounters();
-
-    heartAt(cx,cy);
-    playPurr();
+    heartAtWorld(wx, wy);
   });
 
-  garden.appendChild(cat);
-  wander(cat);
+  world.appendChild(cat);
+  startWander(cat);
   updateCounters();
   return cat;
 }
 
-/* ----------------- UI EVENTS ----------------- */
+/* =========================
+   MOVIMENTO LENTO (facile da seguire)
+========================= */
+function startWander(cat){
+  let baseX = parseFloat(cat.style.left);
+  let baseY = parseFloat(cat.style.top);
+
+  function step(){
+    // target vicino (vagare)
+    const tx = clamp(baseX + rand(-MOVE_RADIUS, MOVE_RADIUS), 30, WORLD_W-90);
+    const ty = clamp(baseY + rand(-MOVE_RADIUS, MOVE_RADIUS), 30, WORLD_H-90);
+
+    // flip direzione
+    const dx = tx - baseX;
+    const flip = dx < 0 ? -1 : 1;
+
+    // aggiorna base
+    baseX = tx; baseY = ty;
+
+    // applica: pos assoluta + translate + flip
+    cat.style.left = tx + "px";
+    cat.style.top  = ty + "px";
+    cat.style.transform = `translate(0,0) scaleX(${flip})`;
+
+    // prossima mossa (lenta)
+    const nextIn = randi(MOVE_EVERY_MS_MIN, MOVE_EVERY_MS_MAX);
+    setTimeout(step, nextIn);
+  }
+
+  // parte dopo un po’
+  setTimeout(step, randi(900, 1800));
+}
+
+/* =========================
+   CAMERA DRAG (trascina per esplorare)
+========================= */
+viewport.addEventListener("pointerdown", (e)=>{
+  dragging = true;
+  viewport.setPointerCapture(e.pointerId);
+  startPX = e.clientX;
+  startPY = e.clientY;
+  startCamX = camX;
+  startCamY = camY;
+});
+
+viewport.addEventListener("pointermove", (e)=>{
+  if(!dragging) return;
+  const dx = e.clientX - startPX;
+  const dy = e.clientY - startPY;
+  // trascini il dito -> muovi camera opposta
+  setCamera(startCamX - dx, startCamY - dy);
+});
+
+viewport.addEventListener("pointerup", ()=>{
+  dragging = false;
+});
+
+/* =========================
+   ADOZIONE CON NOME (MODALE)
+========================= */
+function openNameModal(){
+  pendingAdopt = true;
+  nameInput.value = "";
+  modalBackdrop.style.display = "flex";
+  setTimeout(()=> nameInput.focus(), 50);
+}
+function closeNameModal(){
+  pendingAdopt = false;
+  modalBackdrop.style.display = "none";
+}
+
 btnAdopt.addEventListener("click", ()=>{
-  startAudio();
-  const c = createCat({owned:true});
-  centerOn(c); // subito visibile
+  openNameModal();
 });
 
-btnCenter.addEventListener("click", ()=> centerOn(lastOwned));
-
-btnSound.addEventListener("click", ()=>{
-  startAudio();
-  soundEnabled = !soundEnabled;
-  btnSound.textContent = soundEnabled ? "🔊 Fusa: ON" : "🔇 Fusa: OFF";
+cancelName.addEventListener("click", closeNameModal);
+modalBackdrop.addEventListener("click", (e)=>{
+  if(e.target === modalBackdrop) closeNameModal();
 });
 
-/* ambient cats */
-for(let i=0;i<7;i++) createCat({owned:false});
+confirmName.addEventListener("click", ()=>{
+  if(!pendingAdopt) return;
+  let nm = (nameInput.value || "").trim();
+  if(!nm) nm = "Il mio gatto";
+
+  const c = createCat({owned:true, name:nm});
+
+  // centra subito sul tuo gatto (così lo trovi sempre)
+  const cx = parseFloat(c.style.left);
+  const cy = parseFloat(c.style.top);
+  centerCameraOnWorldPoint(cx, cy);
+
+  closeNameModal();
+});
+
+btnCenter.addEventListener("click", ()=>{
+  if(!lastOwned) return;
+  const cx = parseFloat(lastOwned.style.left);
+  const cy = parseFloat(lastOwned.style.top);
+  centerCameraOnWorldPoint(cx, cy);
+});
+
+/* =========================
+   INIT
+========================= */
+world.style.width = WORLD_W + "px";
+world.style.height = WORLD_H + "px";
+setCamera(camX, camY);
+
+// gatti ambientali
+for(let i=0;i<AMBIENT_CATS;i++){
+  createCat({owned:false, name:"Gatto"});
+}
+updateCounters();
+
+// se ruoti lo schermo
+window.addEventListener("resize", ()=>{
+  setCamera(camX, camY);
+});
 </script>
 </body>
 </html>
