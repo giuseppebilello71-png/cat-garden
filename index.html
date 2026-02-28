@@ -181,7 +181,7 @@
 <body>
 
   <div id="ui">
-    <button class="btn" id="adopt">➕ Adotta un gatto</button>
+    <button class="btn" id="adopt">💳 Compra gatto – 1€</button>
     <button class="btn" id="center" disabled>🎯 Trova il mio gatto</button>
     <div class="pill">🐱 <span id="totCats">0</span> • 💗 <span id="totPets">0</span></div>
   </div>
@@ -533,14 +533,27 @@ confirmName.addEventListener("click", ()=>{
   let nm = (nameInput.value || "").trim();
   if(!nm) nm = "Il mio gatto";
 
+  // scala un “riscatto” se presente
+  pendingPaidCats = parseInt(sessionStorage.getItem("pendingPaidCats") || "0", 10);
+  if(pendingPaidCats > 0){
+    pendingPaidCats -= 1;
+    sessionStorage.setItem("pendingPaidCats", String(pendingPaidCats));
+  }
+
   const c = createCat({owned:true, name:nm});
 
-  // centra subito sul tuo gatto (così lo trovi sempre)
+  // centra subito sul tuo gatto
   const cx = parseFloat(c.style.left);
   const cy = parseFloat(c.style.top);
   centerCameraOnWorldPoint(cx, cy);
 
   closeNameModal();
+
+  // se hai pagato più gatti (in futuro), riapri la modale finché finisci i riscatti
+  pendingPaidCats = parseInt(sessionStorage.getItem("pendingPaidCats") || "0", 10);
+  if(pendingPaidCats > 0){
+    setTimeout(openNameModal, 200);
+  }
 });
 
 btnCenter.addEventListener("click", ()=>{
